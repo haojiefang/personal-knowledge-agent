@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人知识代理 - 项目架构与流程</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        /* GitHub风格样式 */
+        :root {
+            --color-canvas-default: #ffffff;
+            --color-canvas-subtle: #f6f8fa;
+            --color-border-default: #d0d7de;
+            --color-border-muted: #d8dee4;
+            --color-neutral-muted: #656d76;
+            --color-accent-fg: #0969da;
+            --color-accent-emphasis: #0969da;
+            --color-success-fg: #1a7f37;
+            --color-danger-fg: #cf222e;
+            --color-attention-fg: #9a6700;
+            --color-done-fg: #8250df;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+            line-height: 1.5;
+            color: #1f2328;
+            background-color: var(--color-canvas-default);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 0;
+            margin-bottom: 32px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 600;
+            margin: 0 0 16px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.25rem;
+            margin: 0;
+            opacity: 0.9;
+        }
+
+        .section {
+            background: var(--color-canvas-default);
+            border: 1px solid var(--color-border-default);
+            border-radius: 12px;
+            padding: 32px;
+            margin-bottom: 32px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+        }
+
+        .section h2 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin: 0 0 24px 0;
+            color: #1f2328;
+            border-bottom: 2px solid var(--color-border-muted);
+            padding-bottom: 12px;
+        }
+
+        .section h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 32px 0 16px 0;
+            color: var(--color-accent-fg);
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin: 24px 0;
+        }
+
+        .tech-card {
+            background: var(--color-canvas-subtle);
+            border: 1px solid var(--color-border-muted);
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .tech-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            border-color: var(--color-accent-fg);
+        }
+
+        .tech-card h4 {
+            color: var(--color-accent-fg);
+            font-size: 1.2rem;
+            margin: 0 0 12px 0;
+            font-weight: 600;
+        }
+
+        .tech-card p {
+            color: var(--color-neutral-muted);
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 16px;
+            background: var(--color-canvas-subtle);
+            border-radius: 8px;
+            border-left: 4px solid var(--color-accent-fg);
+        }
+
+        .feature-icon {
+            font-size: 1.5rem;
+            margin-right: 12px;
+            color: var(--color-accent-fg);
+        }
+
+        .feature-content h4 {
+            margin: 0 0 8px 0;
+            font-weight: 600;
+            color: #1f2328;
+        }
+
+        .feature-content p {
+            margin: 0;
+            color: var(--color-neutral-muted);
+            font-size: 0.9rem;
+        }
+
+        .mermaid-container {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin: 24px 0;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+
+        .mermaid {
+            text-align: center;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 8px;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-top: 8px;
+        }
+
+        .code-block {
+            background: #f6f8fa;
+            border: 1px solid var(--color-border-default);
+            border-radius: 6px;
+            padding: 16px;
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            margin: 16px 0;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            border-radius: 4px;
+            margin: 2px 4px 2px 0;
+        }
+
+        .badge-primary {
+            background: var(--color-accent-emphasis);
+            color: white;
+        }
+
+        .badge-success {
+            background: var(--color-success-fg);
+            color: white;
+        }
+
+        .badge-warning {
+            background: var(--color-attention-fg);
+            color: white;
+        }
+
+        .badge-info {
+            background: var(--color-done-fg);
+            color: white;
+        }
+
+        .timeline {
+            position: relative;
+            margin: 24px 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--color-border-default);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 60px;
+            margin-bottom: 24px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 12px;
+            top: 8px;
+            width: 16px;
+            height: 16px;
+            background: var(--color-accent-fg);
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px var(--color-accent-fg);
+        }
+
+        .timeline-content {
+            background: var(--color-canvas-subtle);
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid var(--color-border-default);
+        }
+
+        .timeline-title {
+            font-weight: 600;
+            color: #1f2328;
+            margin: 0 0 8px 0;
+        }
+
+        .timeline-desc {
+            color: var(--color-neutral-muted);
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 12px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .header p {
+                font-size: 1rem;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+        }
+
+        /* Mermaid图表自定义样式 */
+        .mermaid .node rect {
+            stroke-width: 2px;
+        }
+        
+        .mermaid .edgeLabel {
+            background-color: white;
+            padding: 4px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <h1>🤖 个人知识代理</h1>
+            <p>基于 RAG 技术的智能知识库助手 - 项目架构与处理流程</p>
+        </div>
+
+        <!-- 项目概述 -->
+        <div class="section">
+            <h2>📋 项目概述</h2>
+            <p>个人知识代理是一个基于检索增强生成(RAG)技术的智能知识库系统，支持多种文档格式的智能问答服务。通过先进的文档处理、向量检索和大语言模型技术，为用户提供精准、高效的知识查询体验。</p>
+            
+            <div class="stats">
+                <div class="stat-card">
+                    <span class="stat-number">4+</span>
+                    <div class="stat-label">支持文档格式</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">2+</span>
+                    <div class="stat-label">集成LLM模型</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">500</span>
+                    <div class="stat-label">默认分块大小</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">8000</span>
+                    <div class="stat-label">最大上下文长度</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 核心特性 -->
+        <div class="section">
+            <h2>🚀 核心特性</h2>
+            <div class="feature-list">
+                <div class="feature-item">
+                    <div class="feature-icon">📄</div>
+                    <div class="feature-content">
+                        <h4>多格式文档支持</h4>
+                        <p>支持PDF、Word、Markdown、文本等多种格式，智能识别文档类型并优化处理策略</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🔪</div>
+                    <div class="feature-content">
+                        <h4>智能文档分词</h4>
+                        <p>基于LangChain的递归分割器，针对中文优化，保持语义完整性</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🔍</div>
+                    <div class="feature-content">
+                        <h4>高精度向量检索</h4>
+                        <p>使用BGE-M3嵌入模型和ChromaDB，支持语义相似度和精确匹配</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🤖</div>
+                    <div class="feature-content">
+                        <h4>多模型集成</h4>
+                        <p>支持DeepSeek云端模型和Ollama本地模型，灵活切换</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">❓</div>
+                    <div class="feature-content">
+                        <h4>复合问题处理</h4>
+                        <p>自动识别并拆分复合问题，分别检索后合并结果</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🎯</div>
+                    <div class="feature-content">
+                        <h4>精确文档过滤</h4>
+                        <p>支持严格模式和相似匹配，可指定特定文档范围查询</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 技术栈 -->
+        <div class="section">
+            <h2>🛠 技术栈</h2>
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <h4>🌐 前端界面</h4>
+                    <p><strong>Streamlit</strong> - 快速构建交互式Web应用，提供直观的用户界面</p>
+                    <div>
+                        <span class="badge badge-primary">Python</span>
+                        <span class="badge badge-info">Web UI</span>
+                    </div>
+                </div>
+                <div class="tech-card">
+                    <h4>🔗 LLM框架</h4>
+                    <p><strong>LangChain</strong> - 强大的LLM应用开发框架，提供文档处理和提示管理</p>
+                    <div>
+                        <span class="badge badge-primary">LangChain</span>
+                        <span class="badge badge-success">RAG</span>
+                    </div>
+                </div>
+                <div class="tech-card">
+                    <h4>🗄 向量数据库</h4>
+                    <p><strong>ChromaDB</strong> - 高性能向量数据库，支持持久化存储和高效检索</p>
+                    <div>
+                        <span class="badge badge-warning">Vector DB</span>
+                        <span class="badge badge-info">Persistent</span>
+                    </div>
+                </div>
+                <div class="tech-card">
+                    <h4>🧠 嵌入模型</h4>
+                    <p><strong>BGE-M3</strong> - Silicon Flow提供的高质量中英文嵌入模型</p>
+                    <div>
+                        <span class="badge badge-success">Embedding</span>
+                        <span class="badge badge-primary">Multilingual</span>
+                    </div>
+                </div>
+                <div class="tech-card">
+                    <h4>🤖 语言模型</h4>
+                    <p><strong>DeepSeek & Ollama</strong> - 云端和本地大语言模型，灵活部署</p>
+                    <div>
+                        <span class="badge badge-primary">LLM</span>
+                        <span class="badge badge-warning">Hybrid</span>
+                    </div>
+                </div>
+                <div class="tech-card">
+                    <h4>📄 文档处理</h4>
+                    <p><strong>PyPDF & python-docx</strong> - 多格式文档解析和内容提取</p>
+                    <div>
+                        <span class="badge badge-info">PDF</span>
+                        <span class="badge badge-success">DOCX</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 系统架构流程图 -->
+        <div class="section">
+            <h2>🏗 系统架构流程</h2>
+            <div class="mermaid-container">
+                <div class="mermaid">
+graph TB
+    %% 用户交互层
+    A[👤 用户] --> B[🌐 Streamlit Web界面]
+    
+    %% 文档处理流程
+    B --> C{📄 文档上传}
+    C --> D[📝 文档类型识别]
+    D --> E[🔍 文档内容提取]
+    E --> F[🧹 文本预处理]
+    F --> G[✂️ 文档分词]
+    
+    %% 向量化存储
+    G --> H[🔗 文本块向量化]
+    H --> I[💾 ChromaDB存储]
+    
+    %% 查询处理流程
+    B --> J{❓ 用户查询}
+    J --> K[🔍 问题类型检测]
+    K --> L{🤔 复合问题?}
+    
+    %% 复合问题处理
+    L -->|是| M[✂️ 问题拆分]
+    M --> N[🔄 子问题处理]
+    N --> O[📑 结果合并]
+    
+    %% 单一问题处理
+    L -->|否| P[🎯 向量检索]
+    O --> P
+    
+    %% 检索和过滤
+    P --> Q[📊 相似度计算]
+    Q --> R{🎯 文档过滤?}
+    R -->|严格模式| S[🔒 精确匹配]
+    R -->|相似模式| T[🔍 语义匹配]
+    
+    %% 上下文构建
+    S --> U[📝 上下文构建]
+    T --> U
+    U --> V[📏 长度限制检查]
+    
+    %% LLM生成
+    V --> W[🤖 LLM推理]
+    W --> X[📄 答案生成]
+    X --> Y[✅ 结果返回]
+    Y --> B
+    
+    %% 样式定义
+    classDef userNode fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef processNode fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef storageNode fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+    classDef llmNode fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef decisionNode fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    
+    class A userNode
+    class B,Y userNode
+    class C,D,E,F,G,H,K,M,N,O,P,Q,U,V,W,X processNode
+    class I storageNode
+    class W,X llmNode
+    class J,L,R decisionNode
+                </div>
+            </div>
+        </div>
+
+        <!-- RAG核心组件详解 -->
+        <div class="section">
+            <h2>🔍 RAG核心组件详解</h2>
+            
+            <h3>📝 文档分词策略</h3>
+            <div class="code-block">
+RecursiveCharacterTextSplitter(
+    chunk_size=500,        # 每个文本块大小
+    chunk_overlap=50,      # 块间重叠字符数  
+    separators=["\n\n", "\n", "。", "！", "？", ".", " ", ""]
+)
+            </div>
+            <p><strong>特点：</strong>递归分割保持语义完整性，智能重叠确保上下文连续性，针对中文标点符号优化。</p>
+
+            <h3>🎯 向量检索机制</h3>
+            <div class="mermaid-container">
+                <div class="mermaid">
+graph LR
+    A[用户问题] --> B[问题向量化]
+    B --> C[向量相似度计算]
+    C --> D[Top-K检索]
+    D --> E{文档过滤}
+    E -->|全局检索| F[所有文档]
+    E -->|精确过滤| G[指定文档]
+    F --> H[相似度排序]
+    G --> H
+    H --> I[返回Top-5结果]
+    
+    classDef queryNode fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    classDef processNode fill:#f1f8e9,stroke:#33691e,stroke-width:2px
+    classDef resultNode fill:#fff8e1,stroke:#f57f17,stroke-width:2px
+    
+    class A queryNode
+    class B,C,D,H processNode
+    class E,F,G,I resultNode
+                </div>
+            </div>
+
+            <h3>❓ 复合问题处理流程</h3>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-title">1. 问题识别</div>
+                        <div class="timeline-desc">检测问题中的多个问号(？、?)或分号(；、;)</div>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-title">2. 问题拆分</div>
+                        <div class="timeline-desc">按分隔符将复合问题拆分为多个子问题</div>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-title">3. 并行检索</div>
+                        <div class="timeline-desc">为每个子问题独立进行向量检索</div>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-title">4. 结果合并</div>
+                        <div class="timeline-desc">合并所有子问题的检索结果，构建完整上下文</div>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-title">5. 统一生成</div>
+                        <div class="timeline-desc">基于合并后的上下文生成综合性回答</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 数据流详细图 -->
+        <div class="section">
+            <h2>📊 数据流详细架构</h2>
+            <div class="mermaid-container">
+                <div class="mermaid">
+graph TD
+    %% 输入层
+    subgraph Input [📁 输入层]
+        A1[PDF文档]
+        A2[Word文档]  
+        A3[Markdown文档]
+        A4[文本文档]
+    end
+    
+    %% 文档处理层
+    subgraph Processing [⚙️ 文档处理层]
+        B1[PyPDF 解析器]
+        B2[python-docx 解析器]
+        B3[Markdown 解析器]
+        B4[文本解析器]
+        B5[🧹 文本清理]
+        B6[📄 元数据提取]
+    end
+    
+    %% 分词层
+    subgraph Splitting [✂️ 分词层]
+        C1[RecursiveCharacterTextSplitter]
+        C2[块大小: 500 字符]
+        C3[重叠: 50 字符]
+        C4[中文分隔符优化]
+    end
+    
+    %% 向量化层
+    subgraph Vector [🔗 向量化层]
+        D1[Silicon Flow API]
+        D2[BGE-M3 模型]
+        D3[批处理: 64 个文本]
+        D4[1024 维向量]
+    end
+    
+    %% 存储层
+    subgraph Storage [💾 存储层]
+        E1[ChromaDB 客户端]
+        E2[持久化存储]
+        E3[HNSW 索引]
+        E4[余弦相似度]
+    end
+    
+    %% 查询层
+    subgraph Query [🔍 查询层]
+        F1[问题预处理]
+        F2[复合问题检测]
+        F3[向量检索]
+        F4[文档过滤]
+        F5[相似度排序]
+    end
+    
+    %% 生成层
+    subgraph Generation [🤖 生成层]
+        G1[上下文构建]
+        G2[提示工程]
+        G3[LLM 推理]
+        G4[答案生成]
+    end
+    
+    %% 流程连接
+    A1 --> B1
+    A2 --> B2
+    A3 --> B3
+    A4 --> B4
+    
+    B1 --> B5
+    B2 --> B5
+    B3 --> B5
+    B4 --> B5
+    B5 --> B6
+    B6 --> C1
+    
+    C1 --> C2
+    C2 --> C3
+    C3 --> C4
+    C4 --> D1
+    
+    D1 --> D2
+    D2 --> D3
+    D3 --> D4
+    D4 --> E1
+    
+    E1 --> E2
+    E2 --> E3
+    E3 --> E4
+    
+    E4 --> F1
+    F1 --> F2
+    F2 --> F3
+    F3 --> F4
+    F4 --> F5
+    F5 --> G1
+    
+    G1 --> G2
+    G2 --> G3
+    G3 --> G4
+    
+    %% 样式定义
+    classDef inputStyle fill:#e8eaf6,stroke:#3f51b5,stroke-width:2px
+    classDef processingStyle fill:#e0f2f1,stroke:#009688,stroke-width:2px
+    classDef splittingStyle fill:#fffde7,stroke:#f9a825,stroke-width:2px
+    classDef vectorStyle fill:#fff3e0,stroke:#ff9800,stroke-width:2px
+    classDef storageStyle fill:#e8f5e8,stroke:#4caf50,stroke-width:2px
+    classDef queryStyle fill:#fce4ec,stroke:#e91e63,stroke-width:2px
+    classDef generationStyle fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
+    
+    class A1,A2,A3,A4 inputStyle
+    class B1,B2,B3,B4,B5,B6 processingStyle
+    class C1,C2,C3,C4 splittingStyle
+    class D1,D2,D3,D4 vectorStyle
+    class E1,E2,E3,E4 storageStyle
+    class F1,F2,F3,F4,F5 queryStyle
+    class G1,G2,G3,G4 generationStyle
+                </div>
+            </div>
+        </div>
+
+        <!-- 性能优化建议 -->
+        <div class="section">
+            <h2>⚡ 性能优化建议</h2>
+            
+            <h3>🔧 分词优化</h3>
+            <div class="feature-list">
+                <div class="feature-item">
+                    <div class="feature-icon">📏</div>
+                    <div class="feature-content">
+                        <h4>动态分块大小</h4>
+                        <p>根据文档类型调整：PDF(800)、MD(600)、TXT(400)、DOCX(700)</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🧠</div>
+                    <div class="feature-content">
+                        <h4>语义分割</h4>
+                        <p>基于句子级别的语义分割，保持语义边界完整性</p>
+                    </div>
+                </div>
+            </div>
+
+            <h3>🎯 检索优化</h3>
+            <div class="feature-list">
+                <div class="feature-item">
+                    <div class="feature-icon">🔄</div>
+                    <div class="feature-content">
+                        <h4>混合检索</h4>
+                        <p>向量检索 + BM25关键词检索，使用RRF算法融合结果</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">📊</div>
+                    <div class="feature-content">
+                        <h4>重排序机制</h4>
+                        <p>使用专门的重排序模型提升检索结果的相关性</p>
+                    </div>
+                </div>
+            </div>
+
+            <h3>💾 缓存优化</h3>
+            <div class="mermaid-container">
+                <div class="mermaid">
+graph LR
+    A[查询请求] --> B{缓存检查}
+    B -->|命中| C[返回缓存结果]
+    B -->|未命中| D[向量检索]
+    D --> E[结果缓存]
+    E --> F[返回结果]
+    
+    G[文本输入] --> H{嵌入缓存}
+    H -->|命中| I[返回缓存向量]
+    H -->|未命中| J[API调用]
+    J --> K[向量缓存]
+    K --> L[返回向量]
+    
+    classDef cacheHit fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
+    classDef cacheMiss fill:#ffcdd2,stroke:#d32f2f,stroke-width:2px
+    classDef process fill:#e1f5fe,stroke:#0288d1,stroke-width:2px
+    
+    class C,I cacheHit
+    class D,J cacheMiss
+    class A,E,F,G,K,L process
+                </div>
+            </div>
+        </div>
+
+        <!-- 部署和监控 -->
+        <div class="section">
+            <h2>🚀 部署架构</h2>
+            <div class="mermaid-container">
+                <div class="mermaid">
+graph TB
+    %% 用户层
+    subgraph "👥 用户层"
+        U1[Web浏览器]
+        U2[移动端]
+    end
+    
+    %% 负载均衡
+    U1 --> LB[🔄 负载均衡器]
+    U2 --> LB
+    
+    %% 应用层
+    subgraph "🖥 应用层"
+        A1[Streamlit实例1]
+        A2[Streamlit实例2]
+        A3[Streamlit实例N]
+    end
+    
+    LB --> A1
+    LB --> A2  
+    LB --> A3
+    
+    %% 服务层
+    subgraph "🔧 服务层"
+        S1[文档处理服务]
+        S2[向量化服务]
+        S3[LLM服务]
+    end
+    
+    A1 --> S1
+    A1 --> S2
+    A1 --> S3
+    A2 --> S1
+    A2 --> S2
+    A2 --> S3
+    A3 --> S1
+    A3 --> S2
+    A3 --> S3
+    
+    %% 存储层
+    subgraph "💾 存储层"
+        DB1[ChromaDB集群]
+        DB2[文件存储]
+        DB3[缓存Redis]
+    end
+    
+    S1 --> DB2
+    S2 --> DB1
+    S2 --> DB3
+    S3 --> DB3
+    
+    %% 外部服务
+    subgraph "🌐 外部服务"
+        E1[Silicon Flow API]
+        E2[DeepSeek API]
+        E3[Ollama本地]
+    end
+    
+    S2 --> E1
+    S3 --> E2
+    S3 --> E3
+    
+    %% 监控层
+    subgraph "📊 监控层"
+        M1[性能监控]
+        M2[日志收集]
+        M3[错误追踪]
+    end
+    
+    A1 --> M1
+    A2 --> M1
+    A3 --> M1
+    S1 --> M2
+    S2 --> M2
+    S3 --> M2
+    LB --> M3
+    
+    classDef userLayer fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef appLayer fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    classDef serviceLayer fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef storageLayer fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    classDef externalLayer fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef monitorLayer fill:#fff8e1,stroke:#fbc02d,stroke-width:2px
+    
+    class U1,U2 userLayer
+    class A1,A2,A3,LB appLayer
+    class S1,S2,S3 serviceLayer
+    class DB1,DB2,DB3 storageLayer
+    class E1,E2,E3 externalLayer
+    class M1,M2,M3 monitorLayer
+                </div>
+            </div>
+        </div>
+
+        <!-- 总结 -->
+        <div class="section">
+            <h2>🎉 项目总结</h2>
+            <p>个人知识代理项目通过集成先进的RAG技术，为用户提供了一个功能完善、性能优异的知识库问答系统。从文档处理到智能检索，从复合问题处理到多模型支持，每个环节都经过精心设计和优化。</p>
+            
+            <div class="feature-list">
+                <div class="feature-item">
+                    <div class="feature-icon">🎯</div>
+                    <div class="feature-content">
+                        <h4>技术先进性</h4>
+                        <p>采用最新的RAG技术栈，集成BGE-M3嵌入模型和ChromaDB向量数据库</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🚀</div>
+                    <div class="feature-content">
+                        <h4>性能优化</h4>
+                        <p>多层缓存机制、批处理优化、智能分词策略确保系统高效运行</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🔧</div>
+                    <div class="feature-content">
+                        <h4>扩展性强</h4>
+                        <p>模块化设计支持新功能扩展，提供丰富的优化建议和改进方向</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">👥</div>
+                    <div class="feature-content">
+                        <h4>用户友好</h4>
+                        <p>直观的Web界面、智能问题处理、多种检索模式满足不同用户需求</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页脚 -->
+        <div style="text-align: center; padding: 40px 0; color: var(--color-neutral-muted); border-top: 1px solid var(--color-border-default); margin-top: 40px;">
+            <p>🤖 个人知识代理 - 让知识触手可及</p>
+            <p>Created by <strong>haojiefang</strong> | Powered by RAG Technology</p>
+        </div>
+    </div>
+
+    <script>
+        // 初始化Mermaid
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            },
+            themeVariables: {
+                primaryColor: '#667eea',
+                primaryTextColor: '#1f2328',
+                primaryBorderColor: '#764ba2',
+                lineColor: '#666',
+                secondaryColor: '#f6f8fa',
+                tertiaryColor: '#e1f5fe'
+            }
+        });
+
+        // 添加复制代码功能
+        document.querySelectorAll('.code-block').forEach(block => {
+            block.addEventListener('click', function() {
+                navigator.clipboard.writeText(this.textContent).then(() => {
+                    const originalBg = this.style.backgroundColor;
+                    this.style.backgroundColor = '#d4edda';
+                    setTimeout(() => {
+                        this.style.backgroundColor = originalBg;
+                    }, 1000);
+                });
+            });
+        });
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html> 
